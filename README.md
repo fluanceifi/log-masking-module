@@ -169,9 +169,8 @@ public class ConveterTest {
 
 ---
 
-## 🔗 링크
-* **Woori FIS Academy**: [https://github.com/woorifisa-service-dev-6th]
-
+## 🏛️ 소속: [우리 FIS 아카데미]
+[![GitHub Organization](https://img.shields.io/badge/GitHub-Organization-181717?style=flat-square&logo=github)](https://github.com/woorifisa-service-dev-6th)
 ---
 
 ## 📝 License
