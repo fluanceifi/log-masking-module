@@ -208,8 +208,11 @@ src/
 
 ## ⚙️ Configuration Details
 
-마스킹 동작 방식을 커스터마이징 할 수 있는 설정입니다. 
-(현재 버전은 `PiiKeywordDictionary`를 통해 관리지만, 추후 사용자가 직접 제어할 수 있도록 개선이 가능합니다.)
+마스킹 동작 방식을 커스터마이징 할 수 있는 설정입니다.
+
+### 기본 키워드 사전
+
+기본값으로 다음 키워드들이 지원됩니다:
 
 | Keyword | Type | Description | Example |
 | --- | --- | --- | --- |
@@ -217,6 +220,23 @@ src/
 | `phone`, `mobile` | PHONE | 휴대폰 번호 패턴 감지 (010-xxxx-xxxx) | `010-1234-****` |
 | `account` | ACCOUNT | 계좌번호 패턴 감지 | `123-45-******` |
 | `card` | CARD | 신용카드 번호 패턴 감지 | `1234-****-****-1234` |
+
+### 커스텀 키워드 사전 사용
+
+사용자가 `resources/masking-keywords.properties` 파일을 생성하여 커스텀 키워드를 추가할 수 있습니다.
+
+**Properties 파일 형식:**
+```properties
+# PII 키워드 사전. 왼쪽=PiiType 이름(rrn|phone|account|card), 오른쪽=로그 key로 쓸 alias 목록(콤마 구분)
+rrn=rrn,residentNo,residentNumber,jumin,ssn_kr
+phone=phone,mobile,tel,contact,msisdn
+account=account,acct,accountNo,bankAccount,withdrawAccount,depositAccount
+card=card,cardNo,cardNumber,pan
+```
+
+**동작 방식:**
+- `PIIConverter`는 시작 시 `resources/masking-keywords.properties` 파일을 우선적으로 로드합니다.
+- 파일이 없거나 로드에 실패하면 기본 키워드 사전을 사용합니다.
 
 ---
 
