@@ -77,6 +77,8 @@ public class LogMaskingTest {
         }
 
         System.out.println("OK: " + passed + "개 케이스 통과");
+        
+        System.out.println(engine.mask("mobile: 010-9999-8888, card=1234-5678-1234-5678"));
     }
 
     private static KeywordBasedLogMaskingEngine createEngine() {
