@@ -1,5 +1,4 @@
-![Architecture of the project](<img width="1489" height="1302" alt="image" src="https://github.com/user-attachments/assets/82a464e6-fd18-4447-abb1-d00f583fc01e" />)
-
+![Architecture of the project](https://github.com/user-attachments/assets/82a464e6-fd18-4447-abb1-d00f583fc01e)
 
 # [우리 FIS 아카데미 6기] Logback PII Masking Module (Log-Masker)
 
