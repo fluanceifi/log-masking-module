@@ -3,6 +3,10 @@ package dictionary;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * 로그에서 노출을 막을 "금지 키" 정책. key는 정규화(trim + 소문자) 후 비교.
+ * 금지 키로 판별된 value는 mode에 따라 REDACT/DROP_VALUE/PASS 처리된다.
+ */
 public final class ForbiddenKeywordPolicy {
 
     public enum Mode {
