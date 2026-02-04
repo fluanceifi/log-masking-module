@@ -22,8 +22,14 @@ import java.util.regex.Pattern;
  *  - 0311234567     -> 031-***-4567
  *  - 051-1234-5678  -> 051-****-5678
  */
-public final class PhoneRule implements MaskingRule {
+public class PhoneNumber implements MaskConvertor {
 
+	private static final PhoneNumber INSTANCE = new PhoneNumber();
+		
+	public static PhoneNumber getInstance () {
+		return INSTANCE;
+	}
+	
     /**
      * 한국 전화번호 패턴(휴대폰 + 유선):
      *
@@ -56,12 +62,12 @@ public final class PhoneRule implements MaskingRule {
     private final Policy policy;
 
     /** 기본 정책(디폴트)으로 PhoneRule 생성 */
-    public PhoneRule() {
+    public PhoneNumber() {
         this(Policy.defaultPolicy());
     }
 
     /** 커스텀 정책으로 PhoneRule 생성 */
-    public PhoneRule(Policy policy) {
+    public PhoneNumber(Policy policy) {
         this.policy = Objects.requireNonNull(policy, "policy must not be null");
     }
 
@@ -70,16 +76,16 @@ public final class PhoneRule implements MaskingRule {
      * - DefaultMasker/Builder가 이 메서드를 호출해서 전체 메시지에 룰을 적용함
      */
     @Override
-    public String apply(String input) {
-        if (input == null) return null;
+    public String convert(String target) {
+        if (target == null) return null;
 
         // 정책이 "전화번호 출력 금지"라면, 탐지 시 통째로 [REDACTED] 처리
         if (policy.mode == Mode.REDACT) {
-            return replaceAllMatches(input, policy.redactedToken);
+            return replaceAllMatches(target, policy.redactedToken);
         }
 
         // 기본: PARTIAL(부분 마스킹)
-        Matcher m = KOREA_PHONE_PATTERN.matcher(input);
+        Matcher m = KOREA_PHONE_PATTERN.matcher(target);
         StringBuffer sb = new StringBuffer();
 
         while (m.find()) {

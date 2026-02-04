@@ -1,20 +1,20 @@
 package strategy.masking;
 
-public class ResidentNumberMaskingStrategy implements MaskingStrategy {
+public class ResidentNumber implements MaskConvertor {
 
     private final String replacement = "******";
 
     // 싱글톤 패턴 적용
-    private static final ResidentNumberMaskingStrategy INSTANCE = new ResidentNumberMaskingStrategy();
+    private static final ResidentNumber INSTANCE = new ResidentNumber();
 
-    public ResidentNumberMaskingStrategy() {}
+    public ResidentNumber() {}
 
-    public static ResidentNumberMaskingStrategy getInstance() {
+    public static ResidentNumber getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public String mask(String target) {
+    public String convert(String target) {
         if (target == null || target.isBlank()) {
             return target;
         }
