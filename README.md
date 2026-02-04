@@ -58,7 +58,7 @@ cd log-masking-module
 ```xml
 <configuration>
     <conversionRule conversionWord="msg" 
-                    converterClass="ch.qos.logback.classic.pattern.PiiConverter" />
+                    converterClass="strategy.masking.PIIConverter" />
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -107,7 +107,7 @@ public class ConveterTest {
 
 ### 1. 로그 이벤트 수신 및 진입 (Converter Layer)
 
-`PiiConverter`는 Logback 프레임워크와 본 모듈을 연결하는 진입점입니다.
+`PIIConverter`는 Logback 프레임워크와 본 모듈을 연결하는 진입점입니다.
 
 * 애플리케이션에서 로그 출력 요청이 발생하면, Logback의 `ClassicConverter`를 상속받은 이 클래스가 실행됩니다.
 * 원본 로그 메시지를 수신하여 하위 레이어인 마스킹 엔진으로 전달합니다.
@@ -136,7 +136,7 @@ public class ConveterTest {
 ```mermaid
 graph TD
     subgraph "1단계: 로그 수신 (Converter)"
-        A[PiiConverter] -->|원본 로그 전달| B
+        A[PIIConverter] -->|원본 로그 전달| B
     end
 
     subgraph "2단계: 로직 제어 (Engine)"
@@ -163,16 +163,24 @@ graph TD
 ### Project Structure
 
 ```text
-src/main/java/ch/qos/logback
-├── classic/pattern/PiiConverter.java       # Entry Point (Logback 연동)
-├── masking/
-│   ├── engine/KeywordBasedLogMaskingEngine.java # 마스킹 로직 제어
-│   ├── strategy/                           # 마스킹 알고리즘 (Strategy Pattern)
-│   │   ├── AccountNumber.java
-│   │   ├── PhoneNumber.java
-│   │   ├── PrimaryAccountNumber.java       # 카드
-│   │   └── ResidentNumber.java
-│   └── adapter/MaskConvertorPiiMaskerAdapter.java # 인터페이스 변환 (Adapter Pattern)
+src/
+├── strategy/masking/
+│   ├── PIIConverter.java                   # Entry Point (Logback 연동)
+│   ├── AccountNumber.java                  # 마스킹 알고리즘 (Strategy Pattern)
+│   ├── PhoneNumber.java
+│   ├── PrimaryAccountNumber.java            # 카드
+│   ├── ResidentNumber.java
+│   ├── MaskConvertor.java                  # 마스킹 전략 인터페이스
+│   └── MaskConvertorPiiMaskerAdapter.java  # 인터페이스 변환 (Adapter Pattern)
+├── core/
+│   ├── KeywordBasedLogMaskingEngine.java   # 마스킹 로직 제어
+│   ├── PiiMasker.java                      # 마스킹 인터페이스
+│   └── PiiType.java                        # PII 타입 enum
+├── dictionary/
+│   ├── PiiKeywordDictionary.java           # 키워드 사전
+│   └── ForbiddenKeywordPolicy.java         # 금지어 정책
+└── util/
+    └── StringUtils.java                    # 유틸리티
 
 ```
 
