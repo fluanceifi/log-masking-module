@@ -21,23 +21,33 @@ package strategy.masking;
  * 입력 문자열 탐지 및 로깅 처리는 외부 공통 로직에서 수행하는 것을 전제로 한다.
  * </p>
  */
-public class AccountMasking {
+public class AccountNumber implements MaskConvertor {
 
+	//싱글톤 패턴 적용
+	private static final AccountNumber INSTANCE = new AccountNumber();
+	
+	public AccountNumber() {}
+	
+	public static AccountNumber getInstance() {
+		return INSTANCE;
+	}
+	
     /**
      * 계좌번호를 마스킹하여 반환한다.
      *
      * @param raw 원문 계좌번호 문자열 (숫자, 하이픈, 공백 포함 가능)
      * @return 마스킹된 계좌번호 문자열 (형식 유지)
      */
-    public String maskAccountNumber(String raw) {
-        if (raw == null) return null;
+	@Override
+    public String convert(String target) {
+        if (target == null) return null;
 
         // 숫자만 추출하여 계좌번호 길이 판단
-        String digits = raw.replaceAll("\\D", "");
+        String digits = target.replaceAll("\\D", "");
         int n = digits.length();
 
         // 숫자가 없는 경우 원문 그대로 반환
-        if (n == 0) return raw;
+        if (n == 0) return target;
 
         // 기본 정책: 앞 3자리 + 뒤 3자리 노출
         int prefix = 3, suffix = 3;
@@ -55,11 +65,11 @@ public class AccountMasking {
               + digits.substring(n - suffix);
 
         // 원문 형식(구분자)을 유지하면서 숫자 위치만 마스킹
-        StringBuilder out = new StringBuilder(raw.length());
+        StringBuilder out = new StringBuilder(target.length());
         int di = 0;
 
-        for (int i = 0; i < raw.length(); i++) {
-            char ch = raw.charAt(i);
+        for (int i = 0; i < target.length(); i++) {
+            char ch = target.charAt(i);
             if (Character.isDigit(ch)) {
                 out.append(maskedDigits.charAt(di++));
             } else {
