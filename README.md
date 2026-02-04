@@ -1,5 +1,4 @@
-![Architecture of the project](<img width="1489" height="1302" alt="image" src="https://github.com/user-attachments/assets/7420115c-386b-498e-b93d-822a9096a276" />)
-제공해주신 프로젝트 설명과 UML 구조, 그리고 템플릿을 바탕으로 **Github 포트폴리오용 README.md 초안**을 작성해 드립니다.
+![Architecture of the project](<img width="1489" height="1302" alt="image" src="https://github.com/user-attachments/assets/82a464e6-fd18-4447-abb1-d00f583fc01e" />)
 
 
 # [우리 FIS 아카데미 6기] Logback PII Masking Module (Log-Masker)
