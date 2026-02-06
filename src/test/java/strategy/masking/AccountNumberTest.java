@@ -1,4 +1,4 @@
-package test;
+package strategy.masking;
 
 import static org.junit.jupiter.api.Assertions.*;
 
