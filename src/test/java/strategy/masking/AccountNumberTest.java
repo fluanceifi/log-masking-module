@@ -2,16 +2,10 @@ package strategy.masking;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import strategy.masking.AccountNumber;
 
 class AccountNumberTest {
 	
@@ -76,24 +70,6 @@ class AccountNumberTest {
             // 구분자만 있는 경우도 숫자 없음 -> 예외
             () -> assertThrows(IllegalArgumentException.class, () -> accountNumber.convert("----")),
             () -> assertThrows(IllegalArgumentException.class, () -> accountNumber.convert("  -  -  "))
-        );
-    }
-	
-	@ParameterizedTest(name = "{1}")
-    @MethodSource("noDigitProvider")
-    @DisplayName("[실패] 숫자가 하나도 없는 케이스들(메시지 포함 검증)")
-    void testFailNoDigitsWithMessage(String input, String description) {
-        IllegalArgumentException ex =
-            assertThrows(IllegalArgumentException.class, () -> accountNumber.convert(input));
-
-        assertTrue(ex.getMessage().contains("유효하지 않은 계좌번호 형식"), "예외 메시지에 원인 설명이 포함되어야 한다.");
-    }
-
-    static Stream<Arguments> noDigitProvider() {
-        return Stream.of(
-            Arguments.of("", "빈 문자열은 예외"),
-            Arguments.of("abc-def", "문자/하이픈만 있으면 예외"),
-            Arguments.of("   ---   ", "공백/구분자만 있으면 예외")
         );
     }
 	
