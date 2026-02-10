@@ -238,6 +238,146 @@ card=card,cardNo,cardNumber,pan
 - `PIIConverter`는 시작 시 `resources/masking-keywords.properties` 파일을 우선적으로 로드합니다.
 - 파일이 없거나 로드에 실패하면 기본 키워드 사전을 사용합니다.
 
+## 🛠️ 리팩토링(예외 처리)
+
+👎 **[코드] 개선 전:**
+
+```java
+		@Override
+    public String convert(String target) {
+        if (target == null || target.isBlank()) {
+            return target;
+        }
+
+        // "950101-1234567" 형태의 주민번호를 "950101-1******"로 마스킹
+        if (target.matches("\\d{6}-\\d{7}")) {
+            return target.substring(0, 8) + replacement;
+        }
+
+        return target;
+    }
+```
+
+- 기존 코드는 부적절한 입력값이 전략 클래스에 매개변수로 들어왔습니다.
+- 따라서 예외가 발생해도 입력값을 그대로 반환해 주는 형식으로 동작하였습니다.
+
+👎 **[단위 테스트]개선 전:**
+
+```java
+// 이것도 마찬가지로 예외를 던져야함. 근데 예외를 하나로 통일할까?
+	@Test
+	@DisplayName("[실패케이스] 실패 & 예외 케이스 ")
+	void 실패_혹은_예외_4가지_테스트() {
+
+		assertAll(
+				// 케이스 1: 하이픈(-)이 없는 경우
+				() -> assertEquals(rm1.convert("9501011234567"), "9501011234567"),
+				
+				// 케이스 2: 자릿수가 부족한 경우
+				() -> assertEquals(rm1.convert("950101-123456"), "950101-123456"),
+
+				// 케이스 3: 자릿수가 초과된 경우
+				() -> assertEquals(rm1.convert("950101-12345678"), "950101-12345678"),
+
+				// 케이스 4: 숫자가 아닌 문자가 포함된 경우
+				() -> assertEquals(rm1.convert("950101-abcdefg"), "950101-abcdefg"));
+				}));
+	}
+```
+
+- 단위 테스트를 작성하면서 분명 실패 케이스인데, **“이렇게 Equals로 확인만 하는게 맞는건가?”** 라는 생각이 들었습니다.
+- 그래서 외부 요인에 의해 실패한 상황에 대해선 **“예외처리를 해줘야겠다!”** 라고 인지하여 수정을 하게되었습니다.
+
+👍 **[코드] 개선 후:**
+
+```java
+@Override
+	public String convert(String target) {
+		// null, " "
+		if (target == null || target.isBlank()) {
+			throw new IllegalArgumentException("유효하지 주민등록번호 형식입니다. 입력값: " + target);
+		}
+
+		// 정규식에 맞지 않으면 예외 발생 (하이픈 없음, 길이 안 맞음, 뒷자리 1~8 아님 등 모두 포함)
+		// 정규식 설명: 앞6자리 숫자 + 하이픈 + 뒷자리 첫글자(1~8) + 뒷자리 나머지 6개
+		if (!target.matches("\\d{6}-[1-8]\\d{6}")) {
+			throw new IllegalArgumentException("유효하지 않은 주민등록번호 형식입니다. 입력값: " + target);
+		}
+
+		// "950101-1234567" 형태의 주민번호를 "950101-1******"로 마스킹
+		if (target.matches("\\d{6}-\\d{7}")) {
+			return target.substring(0, 8) + replacement;
+		}
+
+		return target;
+	}
+```
+
+- **“어떤 예외를 사용할까?”** 고민하던 중 다른 전략을 추가할 때 재사용성과 유연성을 위해 **`IllegalArgumentException.class`** 를 사용하였습니다.
+- 따라서 예외처리 메세지 규격만 통일하면 되도록하였습니다.
+
+👍 **[단위 테스트]개선 후:**
+
+```java
+// 이것도 마찬가지로 예외를 던져야함. 근데 예외를 하나로 통일할까?
+	@Test
+	@DisplayName("[실패케이스] 실패 & 예외 케이스 ")
+	void 실패_혹은_예외_4가지_테스트() {
+
+		assertAll(
+				// 케이스 1: 하이픈(-)이 없는 경우
+				() -> assertThrows(IllegalArgumentException.class, () -> {
+					rm1.convert("9501011234567");
+				}),
+				// 케이스 2: 자릿수가 부족한 경우
+				() -> assertThrows(IllegalArgumentException.class, () -> {
+					rm1.convert("950101-123456");
+				}),
+				// 케이스 3: 자릿수가 초과된 경우
+				() -> assertThrows(IllegalArgumentException.class, () -> {
+					rm1.convert("950101-12345678");
+				}),
+				// 케이스 4: 숫자가 아닌 문자가 포함된 경우
+				() -> assertThrows(IllegalArgumentException.class, () -> {
+					rm1.convert("950101-abcdefg");
+				}));
+	}
+```
+
+- 이렇게 외부 요인에 의해서 잘못된 행위를 체크 예외 처리하였습니다.
+- 하지만 예외를 생성하기만하면 프로그램이 뻗게됩니다.
+- 이제 전략 클래스를 사용하는 어댑터 클래스에서 **`try-catch`** 로 잡아 던져줘야합니다.
+
+👍 **[코드] 수정된 어댑터 클래스:**
+
+```java
+@Override
+    public String mask(String value) {
+        try {
+            // 1. 엄격한 변환 시도 (여기서 실패하면 IllegalArgumentException 발생)
+            return delegate.convert(value);
+        } **catch (IllegalArgumentException e)** {
+            // 2. [실패 시 처리 정책]
+            // 예외가 발생했다는 것은 포맷이 맞지 않는 데이터라는 뜻입니다.
+            
+            // 옵션 A: 원본을 그대로 반환 (디버깅 용이, 민감정보 노출 위험 있음)
+            return value; 
+            
+            // 옵션 B: 에러 태그 반환 (가장 안전, 추천 ⭐)
+            // return String.format("[%s_FORMAT_ERROR]", type.name());
+        } catch (Exception e) {
+            // 3. 예상치 못한 그 외 에러 방어
+            return "[MASKING_ERROR]";
+        }
+    }
+```
+
+```java
+public class IllegalArgumentException extends RuntimeException
+```
+
+- 이런식으로 `IllegalArgumentException` 을 이용하여 `try-catch` 처리하였습니다.
+
 ---
 
 ## 🤝 Contributing
