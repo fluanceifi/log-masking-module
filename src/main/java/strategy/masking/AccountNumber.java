@@ -40,14 +40,18 @@ public class AccountNumber implements MaskConvertor {
      */
 	@Override
     public String convert(String target) {
-        if (target == null) return null;
+        if (target == null) {
+        	throw new IllegalArgumentException("입력값이 null이거나 비어있습니다.");
+        }
 
         // 숫자만 추출하여 계좌번호 길이 판단
         String digits = target.replaceAll("\\D", "");
         int n = digits.length();
 
-        // 숫자가 없는 경우 원문 그대로 반환
-        if (n == 0) return target;
+        // 숫자가 없는 경우 예외 반환
+        if (n == 0) {
+        	throw new IllegalArgumentException("유효하지 않은 계좌번호 형식입니다. 입력값: " + target);
+        }
 
         // 기본 정책: 앞 3자리 + 뒤 3자리 노출
         int prefix = 3, suffix = 3;
