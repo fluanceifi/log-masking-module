@@ -1,9 +1,8 @@
 ![Architecture of the project](https://github.com/user-attachments/assets/82a464e6-fd18-4447-abb1-d00f583fc01e)
 
 # [우리 FIS 아카데미 6기] Logback PII Masking Module (Log-Masker)
-
+> **"보안은 선택이 아닌 필수!`"**<br>
 > **금융권 프로젝트를 위한 개인정보(PII) 자동 마스킹 로그백 모듈**<br>
-> **"보안은 선택이 아닌 필수입니다."**<br>
 > 이 모듈은 개발자가 비즈니스 로직에서 별도의 마스킹 처리를 해야되는 것에 불편함을 느껴 개발하게 되었습니다. <br>
 > 저희 모듈을 사용하면, 로그가 기록되는 시점에 자동으로 민감 정보(주민번호, 계좌번호 등)를 감지하여 마스킹 처리합니다.
 
